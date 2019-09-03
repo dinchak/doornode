@@ -1,0 +1,5 @@
+@ECHO OFF
+C:
+CD \DOORS\SRE
+SRE
+exit

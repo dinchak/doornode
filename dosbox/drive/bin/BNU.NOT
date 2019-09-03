@@ -1,0 +1,103 @@
+----------------
+ADDITIONAL NOTES
+----------------
+
+
+BNUHLP
+======
+
+    This is a BNU specific utility, which may be used with either the .COM
+    (memory resident TSR) or the .SYS (device driver) version of BNU.
+
+    BNUHLP contains functions found only in the TSR version previously, and
+    some of the more often used functions of BNU.COM/.SYS are included in 
+    BNUHLP to make switching of drivers easier without having to modify your
+    batch files every time you change.
+
+    Only a subset of the commands available with BNU.COM are provided.  
+    Those functions which are the same as BNU.COM are also identical in 
+    syntax, rules and usage.
+
+    Following is the list of commands available in BNUHLP:
+
+    /C      reCapture INT 14H vector  (required under DESQview etc.)
+    		usage: /C
+    /Q      release INT 14H vector (removes BNU from the 14h chain)
+    		usage: /Q
+    /B      reBoot system immediately (/B0 is cold boot, /B1 is warm)
+    		usage: /B[0|1]     (boom!)
+    /F	    (toggle) Fast screen write via ANSI driver
+    		usage: /F[+|-]
+    /M      (toggle) init Message display
+    		usage: /M[+|-]
+    /I      Initialise/deinitialise driver on port, or all ports
+    		usage: /I<port>[+|-]
+		     -or-  /I*	   (deinits all)
+    /?      displays the Help screen
+    		usage: /?
+    /W      enable/disable carrier Watchdog on a port
+    		usage: /W<port>[+|-][,ticks]
+            (see above for optional [,ticks] parameter)
+    /O      Opus!Com/X00 cOmpatibility mode (fn 0x1c is max)
+    		usage: /O[+|-]
+    /Z      sets 16550 FIFO buffering (as per .COm version)
+    		usage: /Z          (use default buffering per hardware)
+	         -or-  /Z<level>   (see 1.70's docs with exception above)
+    /X      XON/XOFF protocol select, toggles IXANY support
+    		usage: /X[+|-]
+    /S      display driver Status
+    		usage: /S
+    /H      force on/off given handshaking protocol
+    		usage: /H[F|N]<port>,[X|C|R|A]     (see notes above)
+    /L      Lock/unlock port speed and/or parameters
+            usage: /L<port>:<baud>[,<parms>    (see docs v1.70)
+
+
+TASK MANAGER
+============
+
+This is a driver which interfaces to BNU to assist in running under
+multitasking software.  If used, it MUST BE RUN IMMEDIATELY AFTER
+LOADING BNU (or in the case of BNU.SYS, shortly after in AUTOEXEC.BAT).
+TM should _NEVER_ be loaded in a DESQview window if BNU is loaded prior
+to DV.  This is almost DEFINITELY cause a system lockup - sooner of
+later... Since BNU 'hooks into' TM, it is not separately unloadable.
+If BNU.COM is removed from memory, then memory allocated and used by
+TM will also be freed.
+
+TM understands one command line parameter.  This indicates to the
+driver it's basic timeout period.  The timout period (expressed in
+clock ticks) is by default is around half a second (9 ticks), which
+is farily conservative. I've found best results at 4-5.
+
+This release includes both TM for DESQview (TM-DV) and PC-MOS/386 (TM-PM).
+
+HOW IT WORKS:  BNU has some "idle detect" hooks.  Whenever the
+communications driver is called, it examines the function being
+called.  Typically, a program calls BNU and "polls" when it's idle
+(which is a waste of cycles in most cases, but an application does
+have to keep an eye on things...), for port status, receive buffer
+status, or sometimes the transmit buffer is full, and no matter how
+hard the application tries, it cannot place any more characters there.
+
+So, for these calls, BNU calls an "I think I'm being polled" hook in
+TM.  In turn, TM examines how long this has been occuring, and if it
+occurs for greater than the number of ticks specified (or 9 if no 
+command-line switch was used), it starts releasing time slices on 
+all subsequent "poll" calls.  BNU is also smart enough to detect 
+real activity occuring, and so terminates this arrangement 
+immediately things start to happen - the result is that by just 
+calling FOSSIL, the application automatically gives up time slices
+when it is truely idle.
+
+For those using the diagnostics window, there is a field labelled "TMPoll",
+which indicates the current state of TM.  On a single tasking machine with
+TM either not loaded or inactive (multitasker is not loaded), this field
+will remain 0000.  When active, 0000 indicates that there's FOSSIL activity
+occuring, FFFF indicates a poll timeout (TM is time slicing!), and values
+in between denote that some calls are "polling", but not enough to trigger
+the idle detect switch on.
+
+Each tick is approx 1/18th of a second.  The /T parameter takes arguments
+expressed in ticks.  The default is 9 (half a second), and as I've already
+said - 4 or 5 seems to work fine.

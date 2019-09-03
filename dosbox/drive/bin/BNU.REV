@@ -1,0 +1,709 @@
+--------------------------
+Changes since 1.70 release
+--------------------------
+
+
+	** MAKE SURE YOU REMOVE ALL REFERENCES TO THE /M SWITCH IN ALL
+	   YOUR EXISTING COMMAND LINES - IT IS NO LONGER SUPPORTED!
+	   BNU NO LONGER ISSUES A MESSAGE WHEN IT IS INITIALISED
+
+
+---- v1.89h 12 Nov 1990
+
+	o Changed diags window to reflect the TM-assigned task number and
+	  time slice counter.  TM now accepts no switches, since all the
+	  time slice logic is now contained within BNU. NOTE THAT EARLIER
+	  VERSIONS OF TM ARE NOT COMPATIBLE WITH BNU 1.89h AND ABOVE! These
+	  are _guaranteed_ to cause a system lockup if used.
+
+	o Added /V<size> switch to allow for virtualised and buffered I/O
+	  environments, such as VP/ix, VM86 and Windows 3.0/enhanced. It is
+	  possible in these environments to use a simulated UART transmit
+	  FIFO (just as though a 16550AFN is in use) since the VM86
+	  supervisor normally buffers I/O itself. Nor do some of these 
+	  environments correctly emulate the 16550A??, so only single 
+	  character I/O is supported in a standard configuration due to the 
+	  identification "failure" (the 'UART' looks and works like a 16450).
+	  An example of how the switch is used:
+
+		/V16		Forces a 16 byte FIFO queue
+
+	  I've managed to use a 128 byte FIFO under VP/ix.  Unfortunately,
+	  that environment has problems with receiving at high speeds, and
+	  for no apparent reason the receiver will not function at baud rates
+	  at and above 19200. 9600 baud and below give quite acceptible
+	  performance and works quite reliably, so disabling MNP might actually
+	  help.
+
+	o Changed TM's logic somewhat; some performance considerations made me
+	  change the way in which it works.  Now each port number is assigned
+	  a logical 'task' number when the FOSSIL is initialised - passed every
+	  time a call to that port requests giving up the current tasks time
+	  slice.  This may not be a true in all cases, but it should cover the
+	  majority of situations.  It does not allow for two tasks sharing the
+	  same port (which is pretty uncommon anyway). In any case, the
+	  reentrancy of BNU is still not comprimised.
+
+	o Fixed a bug in TM's DDOS time slicing; previous TM-DD would have been
+	  ineffective in giving up slices under DoubleDOS.
+
+	o Several changes to allow BNU to work better under VP/ix and Windows.
+	  These changes may allow BNU to work with an 82C450 UART, but I haven't
+	  yet tried it...
+
+	o Small bug fix to the set flow control flags call (now masks out bit 3,
+	  which is invalid under the current FOSSIL spec, but reserved for DSR
+	  handshaking, which BNU doesn't support anyway)
+
+	o Changed transmit logic strategy to allow better for loss of interrupts
+	  due to interrupt latency; the transmitter should recover immediately
+	  from a lost interrupt.
+
+	o Fixed bug in BNUHLP recapture
+
+	o Added /E1 switch in v1.89f (sorry, forgot to mention that). It's
+	  specifically for Windows and effectively makes the COM ports
+	  "invisible" to all but FOSSIL applications. This probably won't
+	  work well with non-FOSSIL doors, but I'd be interested in any and
+	  all feedback on usage under Windows 3.0.
+
+
+---- v1.89g 09 Oct 1990
+
+	o Fixed a stupid bug in BNU's setup code on installation which crashed
+	  some systems when the FOSSIL was initialised...
+
+
+---- v1.89f 08 Oct 1990
+
+	o An incorrect message (no ports available) will no longer display if
+	  an attempt is made to init the driver when it isn't resident
+
+	o Corrected problem with the INS8250-B UART within the interrupt
+	  service routine; apparently the line status register is not reliable
+	  on these UARTS.
+
+	o Fixed bug in baud rate setting on install when FOSSIL is locked on
+	  a port (it would skip setting the baud rate immediately)
+
+
+---- v1.89e 19 Aug 1990
+
+	o Fixed a typo in the buffer init routine which caused a change
+	  buffer size request (/T /R) to hang
+
+	o Fixed a problem in PC-MOS/386 reboot function
+
+
+---- v1.89d 15 Aug 1990
+
+	o Fixed problems (I hope) in transmitter restart
+
+	o Boot under PC-MOS/386 with /B switch fixed
+
+	o Fixed watchdog call; was previously not installing itself
+	  correctly within the timer tick
+
+	o A *lot* more work done on the transmitter logic; this should
+	  solve problems with the transmitter stop; BNU now disables TX
+	  interrupts when the transmitter is idle (thanks to Dave Hatch :-))
+	  The ISR has undergone a significant overhaul.
+
+	o Removed a number of kludges I had previously used to work around
+	  the stuck transmitter problem
+
+	o Fixed a subtle problem in the flow control call which I _think_
+	  was causing problems with the chat function under Maximus on some
+	  hardware
+
+	o Removed the "disable init message" switch from BNU.COM/.SYS and
+	  BNUHLP.  BNU no longer outputs a message when initialised - that
+	  code has been moved to the non-resident portion, since I think 
+	  it's more beneficial to consume less memory than output copyright
+	  messages :-)  Init message status removed from /S display.
+
+	o Debug panel display now includes interrupt enable register readings
+
+	o Changed meaning of some values in the debug panel in line with
+	  changes to the transmitter logic; hopefully I'll get time to do a
+	  developer's doc for the next release which will explain them
+
+	** Please watch this one carefully: some significant things have
+	   changed and it requires careful testing - especially under BBS
+	   software which I haven't tested extensively at all.
+
+
+---- v1.89c	05 Aug 1990
+
+	o Added PORTTEST (COM port diagnostic) to the package
+
+	o Fixed a possible transmitter overrun problem with 16550AFN's
+	  by shortening the maximum transmitter FIFO queue by 1.
+
+	o Transmitter queue routine changed slightly; should be faster
+	  now (though I doubt if you'll see any real difference in transfer
+	  rates!)
+
+	o TM-DD (hopefully) fixed.
+
+	o Added /B1 switch to disable DOS busy detection.  If you found
+	  the last TM a little slower than previously, and you don't run
+	  programs which call FOSSIL in background, then try this to see
+	  if it improves things.  I'm curious. :-)
+
+	o Couple of other minor mods not worth mentioning.
+
+
+---- v1.89á 22 Jul 1990
+
+	o Allowed dynamic changing of watchdog delay period without having
+	  to disable it first; this has the effect of BNU not considering
+	  multiple trys at watchdog enable an error (ie. no big deal..)
+
+	o Fixed (again! argh!) reentrancy problem in FOSSIL init call;
+	  this produced strange problems when two ports initialised at
+	  once
+
+	o Fixed baud rate lock at 9600 in the .COM version; was actually
+	  locking at 75 baud in error (which is pretty handy...)
+
+	o BNU now returns 0xffff when an errant call is made; should be
+	  a temporary workaround until something in Opus/CHAT is fixed
+	  (PLEASE TEST!)
+
+	o BNU again releases its environment; let me know of any problems
+	  on this one
+
+	o Calling port status which returns the static image of the line 
+	  status register now masks out receiver overrun errors for any
+	  subsequent calls until it again hits that condition (character
+	  received when FOSSIL RX buffer full)
+
+	o Added more CPU register reporting to the diags window to help
+	  diagnose errors; particularly errant calls
+
+	o Several modifications to support FDCD in BNUHLP
+
+	o Found the (argh!) bug in TM which wasn't checking the
+	  correct flag in DOS to see whether to time slice or not;
+	  Should be safe now to use TM with DoorWay and D'Bridge
+	  (without the QEMM exception errors) which make calls to 
+	  FOSSIL calls in "background" (PLEASE TEST THIS - I NEED 
+	  FEEDBACK TO MAKE SURE IT'S WORKING CORRECTLY!)
+
+	o PC-MOS/386 "in-MOS" detection code reinstated (same problem
+	  as above)
+
+	o Added TM-DD to supports time slicing under DoubleDOS
+
+	o CHKCRC provides a check on all file CRC's. (see CRC.LST for
+	  distribution values)
+
+
+---- v1.88á 27 May 1990
+
+	o Removed shared-IRQ support :-( (temporary until 1.90 release)
+
+	o Fixed bug in "lock baud rate" switch (/L) in BNUHLP which
+	  set incorrect bits
+
+	o Reinstated modem error reporting support in diags window
+
+	o 'Snoop' added to BNU package for aiding in diagnosis and allowing
+	  a 'snapshot'
+
+
+---- v1.87à 19 Apr 1990
+
+	o More revisions to BNU's interrupt service; some fairly extreme
+	  optimisations added, some "debugging" options eliminated as a
+	  result (the debug window no longer logs modem status changes)
+
+	o BNU now clears line status errors on each status call (solves
+	  the problem with Opus/framing errors).
+
+	o Fixed a problem in "transmit flush" which caused apparent
+	  'lockups' with some UART configurations
+
+
+---- v1.86á 17 Apr 1990
+
+	o Removed requirement for / or - preceeding options in TM, to
+	  be consistent with BNU and BNUHLP
+
+	o Significant improvement to ISR; BNU should now work *much*
+	  better in 'tough' conditions; ie. high baud rate and multi
+	  line.
+
+	o Fixed a flow control bug which caused the transmitter to stop
+	  during a file transfer whenever the receiver's buffer became
+	  full (usually restarted by timeout).
+
+	o Modified the way the transmitter works, completely removing
+	  the requirement for disabling interrupts when working with
+	  16550 FIFO's.
+
+
+---- v1.85á 08 Apr 1990
+
+	o Removed some debug code (might have been causing problems)
+
+	o TM-PM revised; removed INMOS detection code, which caused
+	  task slicing not to work (apparently MOS switches to its
+	  internal stack on a software interrupt? Hmmm)
+
+	o Corrected two problems in port parameter locking using the
+	  /L switch in BNUHLP
+
+	o Corrected the status display of locked baud rates and port
+	  parameters.
+
+
+---- v1.85à
+
+	o Optimised some ISR code for better efficiency/speed, some
+	  further rearrangement to implement shared IRQ's
+
+	o Fixed 9600 locked baud rate (was locking at 7200)
+
+	o Implemented shared IRQ's
+
+	o Semaphore used to ensure two ports not colliding in init
+	  function
+
+
+---- v1.84á 07 Mar 1990
+
+	o Remote CTS timeout strategy eliminated (this was a kludge around
+	  previously existing problems which have since been solved), so
+	  /Y is now defunct
+
+	o Status /S switch now displays carrier watch status
+
+	o Automatically adapts boot procedure for PC-MOS/386 when detected,
+	  reboot should also work more reliably under DESQview/386 (any
+	  feedback appreciated)
+
+	o To maintain BNU's re-entrancy from within DOS, TM now checks that 
+	  DOS is not busy prior doing find task number calls and time 
+	  slicing (I don't think this is necessary, but not knowing for
+	  sure I thought I'd make sure it wouldn't cause any problems)
+
+	o BNUHLP now supports status display; handshaking force on/off also
+	  added to status in both BNUHLP and BNU.COM
+
+	o Bug fixed in .SYS version which could cause problems when BNUHLP
+	  was run (some variables were inadvertantly being overwritten)
+
+	o Port locking/unlocking on-the-fly added to BNUHLP
+
+	o The '/' or '-' before command line arguments is now optional
+	  (earth shattering, huh?)
+
+	o Added 'all' option to handshaking mask control switch /H, and
+	  squashed a wee bug there in BNUHLP's version.  You can now 
+	  specify something like:  /HF0+,A  This allows switching on/off 
+	  ALL flow control flags (XON/XOFF local, CTS/RTS local and 
+	  control remote using XON/XOFF), and is equivalent to /HF0+,CRX
+	  but is a little easier to understand
+
+	o Additional test for receiver ready added to ISR, which will
+	  hopefully further ensure reduction in the incidence of receive
+	  character loss
+
+	o Up to 16 ports are now supported for concurrent use; this is 
+	  BNU's maximum port configuration anyway.
+
+	o New BNUPORT added to this package - earlier versions will not
+	  work and are incompatible; patch table files from earlier 
+	  versions will be read by this version and automagically 
+	  converted to the new more compact format
+
+	o And especially for those who don't read release notes <grin>
+	  the /M option is now disabled in all beta versions so that the
+	  init message WILL be displayed with the new "THIS IS A BETA"
+	  message.  If you ask about it, you're in for some public
+	  embarassment about not RTFM'ing!  ;-)
+
+
+---- v1.83à 14 Feb 1990
+
+	o Experimental version(s) only
+
+	o /? is now the ONLY help switch; /H reserved for ...
+
+	o Added setting handshake mask ON and OFF to force or mask out
+	  local and remote handshaking.  Format of this switch is:
+	        /H{F|N}<port>{+|-},[C|X|R]
+
+	  Examples are:
+
+	        /HF0+,XR    Forces ON, xon/xoff handshaking for both
+	                    remote and local so that despite what the
+	                    application sets, XON/XOFF is always enabled.
+	        /HF0-,X     Switchs off forcing on xon/xoff handshaking
+	                    when XON/XOFF is received from the remote
+	                    system; this resets any switch which forced
+	                    'X' on (ie. reverses /FF0+,X).
+	        /HN0+,C     Forces CTS/RTS handshaking off on COM1.
+	        /HN1-,CX    Switches forcing both CTS/RTS and XON/XOFF
+	                    handshaking off for COM2, reversing a previous
+	                    /FN1+,CX.
+
+	  This switch should ONLY be used in special circumstances, where
+	  you wish to achieve a SPECIFIC PURPOSE.
+
+	  WARNING: DO NOT USE THIS SWITCH UNLESS YOU UNDERSTAND IT AND
+	           KNOW EXACTLY THE EFFECT YOU WISH TO ACHIEVE!!
+
+	  Some examples of use are where your modem does not do true CTS/RTS
+	  handshaking or does it incorrectly. For example, making CTS follow
+	  carrier detect, stopping any commands being sent to the modem after
+	  carrier loss (and the application does not provide an option to not
+	  use CTS/RTS flow control); similarly where you use a three-wire
+	  direct connect wire between machines without a CTS line; where
+	  your modem cable does not support a CTS wire; where a BBS uses
+	  block read/writes but does not enable XON/XOFF flow control to allow
+	  ^S and ^Q to control screen start and stop.
+
+	o A few bug fixes/corrections:
+	    . Setting baud rate when FOSSIL was not initialised
+	    . Fixed serious problem in transmit/receive block functions where
+	      interrupts would be disabled for too long due to a missing STI
+	      instruction in a common subroutine
+	    . Found error in ISR which prevented disabling of CTS/RTS flow
+	      control (CTS/RTS flow control was respected regardless)
+
+	o Fixed reboot to work correctly under DESQview/386
+	
+	
+---- v1.82á 23 Jan 1990
+
+	o Finally a released beta ...
+
+	o CTS timeout now defaults to OFF, and must be enabled specifically
+	  with /Yn (where n is in ticks).  Don't use it if you aren't having
+	  problems since it will definitely create some for you.
+
+
+---- v1.81à 21 Jan 1990
+
+	o Inserted 'hooks' for an external data capture buffer and added
+	  'reserved' function to integration for a program to be released
+
+	o Modified 'break' handling to force a fixed interval break in
+	  transmit buffer flush, which can be switched on and off for each
+	  port individually.  the new syntax is:  /G<port>[+|-]
+	  where port is 0=COM1, 1=COM2 etc. and '+' switches this break
+	  handling on, and '-' switches it off
+
+	o Modified (a little) the way communications interrupts are handled;
+	  SEOI rearms 8259A at commencement of IRQ handler to ensure no loss
+	  of interrupts is possible
+
+	o Up to 8 ports are now supported concurrently (was 4)
+
+	o Prepared for chaining of ports to the same IRQ (not supported in
+	  this version yet!)
+
+	o Modified debug window for more concise and relevant info
+
+	o Limited test releases
+
+
+---- v1.80â 15 Jan 1990
+
+	o Corrected reboot code (typo) causing code not to work
+
+	o Corrections to break signal logic
+
+	o Further modifications to reboot code: it should work far more
+	  reliably now under DV/386 and PC-MOS/386.
+
+	o Found suspicious error in maintenance of an internal status flag
+
+	o Fixed error in the "BIOS compatible" code for setting baud rates:
+	  this indirectly affected locking baud rates as well
+
+	o Limited release
+
+
+--- v1.79ä 04 Jan 1990	 * Emergency bug fix *
+
+	o Fixed errors in new CTS signal recovery logic
+
+
+--- v1.80à 07 Jan 1990
+
+	o Modified .SYS version / BNUHLP interraction
+
+	o BNUHLP now works in "non-verbose" mode when the /M- option has
+	  been set when installed or via BNUHLP itself
+
+	o Fixed bug in BNUHLP not setting driver options correctly
+
+	o Modified /O switch to default to '+' (enable compatibility
+	  mode) in .COM version and BNUHLP
+
+
+--- v1.80à 09 Jan 1990
+
+	o Removed (hopefully) braindamage from the CTS timeout routine,
+	  so now it should be more reliable and consistent
+
+	o Note that /Y<ticks> allows setting of this timeout (this has
+	  been present, but 'undocumented' since adding this logic)
+
+	o Internal version only
+
+
+--- v1.80á 11 Jan 1990
+
+	o Support for flushing modem's transmit buffer on transmit purge
+	  call by sending break signal for a specified period: the time
+	  the break signal up is configurable (and this option is enabled)
+	  using the /G<ticks> switch (typical setting is /G5 for approx
+	  0.25 seconds).  This seems to provide faster response to
+	  'hotkeyed' applications
+
+	  WARNING: You would be advised to test this carefully; it's use
+		   will normally require adjustment for your modem's settings
+		   to enable the feature to "purge modem buffer on receiving
+		   break from DTE (your computer)".
+	  THIS OPTION SHOULD ONLY BE USED WHERE YOUR MODEM HAS AN OPTION TO
+	  PREVENT SENDING 'BREAK' TO THE REMOTE: CURRENTLY - SO FAR AS I AM
+	  AWARE - ONLY HST'S OFFER THIS OPTION.  MAKE SURE &Y0 IS ENABLED!
+
+	o CTS/RTS override strategy now sends a break if the /G option is
+	  enabled to help the modem to recover from braindamage (use carefully)
+
+	o Added /G to BNU.COM BNUHLP.COM and BNU.SYS.
+
+	o Experimental version with limited release
+
+
+--- v1.79ã 03 Jan 1990
+
+	o Changed some internals in the way locked baud rates work
+
+	o Corrected problem in .sys version when parsing command line
+	  for a locked baud rate
+
+	o Significant cleanup of .SYS version interface and facilities
+
+	o removed /B switch (redundant) from .SYS version
+
+	o added basic funtional BNUHLP.COM (see notes below)
+
+	o added functional task manager driver for DESQview and PC-MOS/386
+
+	o added CTS signal low timeout to prevent blocked transmitter
+	  states when a modem is in error.  The default timeout is 10
+	  seconds (ie if CTS from the modem stays low for more than 10
+	  seconds, BNU will ignore this until the next modem status change).
+
+
+--- v1.79â 01 Jan 1990
+
+	o Modified uninstall routine to allow for TM's install process and
+	  resident detection.
+
+	o Small change to reboot code to cope with PC-MOS/386 v3.0
+
+	o Added hook for "get counter" from task manager (mainly for
+	  debugging), and modified diags window to indicate UART type in
+	  upper byte of FIFO size
+
+	o Substantial modifications to port baud rate & parameters setting,
+	  fixing "bug" in the baud rate returned in "fossil data" call 1bh.
+	  This call will now return the ACTUAL baud rate/parameters (it
+	  previously returned incorrect data).
+
+	o Small modifications to port init to force modem status change and
+	  kick interrupts...
+
+	o Bios version of baud rate set no longer turns interrupts off, but
+	  preserves their state
+
+
+--- v1.79á 23 Dec 1989
+
+	o Fixed bug in setting baud rate on install, port was not being
+	  immediately set if not COM1
+
+	o Forced watchdog to lower DTR prior reboot for both better
+	  security and to prevent autoanswer modems from answering until
+	  the application had fully restarted
+
+	o CHANGED /B SWITCH *** NOTICE *** /Bn old syntax is no longer
+	  supported: BNU should now reboot correctly in all cases under
+	  DESQview/386 and on most PC-compatible hardware.  The new syntax
+	  is now /Bn, where n = 0 is cold boot, n = 1 is warm boot
+
+	o /I* will now deinit ALL active communications ports
+
+	o Limited release to specifc sites to ensure specific problems
+	  have been solved...
+
+
+--- v1.78á 16 Dec 1989
+
+	o Internal version only
+	o Solved problem with locking baud rates on anything but COM1; this
+	  interferred with other communications software running on COM1,
+	  such as mouse drivers, etc.
+	o Enabled switchable support for XOFF/ANY mode (any character
+	  received unblocks an XOFF'ed transmitter instead of just XON),
+	  the new command line switch is /X+ (or just /X) to enable XOFF/ANY
+	  and /X- to use the default XOFF/XON protocol
+	o Added XOFF protocol setting to status display
+	o Closed stdout & stderr on install to prevent DOS allocating a
+	  file handle on redirected stdout/stderr
+
+
+--- v1.77á 03 Dec 1989		** Back to beta versions again!
+
+	o Improved transmitter logic handling in character IO functions
+
+	o Changed and improved method of FOSSIL controlled transmitter block
+	  flag in FOSSIL function 10h - Opus (which uses this extensively)
+	  should be much improved and transmitter interrupt handling more
+	  efficient
+
+	o Found and squashed "the" bug introduced in 1.73à causing hanging
+	  occasionally and memory allocation problems under PC-MOS/386 :-)
+
+	o Autodetect for the older 16550 (no AN) now installed; /Z2 will be
+	  default for these machines unless a /Z switch is specified
+
+	o /Z with no digit now restores BNU to it's default autodetect FIFO
+	  state
+
+	o Modified /Z1 to be now 16TX by 08RX to optimise for the older
+	  style 16550 (this used to be BNU's default); this allows for
+	  interrupt latency on the receive side (the usual requirement for
+	  using the /Z switch) without sacrificing transmit buffer size!).
+
+	o Corrected a problem in port lock command line parsing, where the
+	  specification of ,nps with the baud rate would not be effective
+	  or would not set the port correctly
+
+
+--- v1.76à 29 Nov 1989
+
+	o Internal test version only; testing TX state checking - eliminated
+	  most of the new logic since the problem it was meant to solve ended
+	  up being hardware related... :-(
+
+
+--- v1.75à 25 Nov 1989
+
+	o Placed more transmitter state checks in character TX, TX no wait
+	  and TX flush to increase TX turnaround and decrease chance of a
+	  'stuck' transmitter.
+	o This version was distributed to specific sites only.
+
+
+--- v1.74à 18 Nov 1989
+
+	o Placed further transmitter state checks in character TX, TX no
+	  wait and TX flush to increase TX turnaround and decrease chance
+	  of a 'stuck' transmitter.
+
+	o Enabled a timeout delay before reboot using the carrier watchdog.
+	  The new command line parameter (compatible with old) is:
+		BNU /W<port>+|-[,<ticks>]
+	  Example, to enable carrier watchdog on port 1 (COM2) to reboot
+	  approx 4 seconds after carrier loss, the following would be
+	  executed:
+		BNU /W1+,72
+	  The timeout value is expressed in "ticks", where each timer tick
+	  is equal to approx 18.2 per second.  A 1 minute delay requires
+	  a delay factor of about 1100 ticks (there are approx 65520
+	  ticks/hour).
+
+	o Stopped BNU "complaining" if a /P command line switch duplicated
+	  the number of ports as previously set on install (saves having a
+	  separate install line if only one command line is ever used in a
+	  batch file).
+
+
+--- v1.73à 13 Nov 1989
+
+	o Changed to specific EOI in interrupt handler instead of non-
+	  specific EOI,
+
+	o BNU now (again) supports the upper 8 interrupts on a 16 bit
+	  bus, and sends a specific EOI to the master 8259A on IRQ 2
+	  if an upper (IRQ 8-15) interrupt is used,
+
+	o Some redundant code has been eliminated from the ISR (saved a
+	  few more clock cycles, anyway),
+
+	o BNU's internal CTS/RTS signal is now set on port init when CTS
+	  is found low (previously it was left clear and not set until the
+	  first MSI occured),
+
+	o BNU now uses INT 1cH vector for timer interrupt functions,
+
+	o The timer hook now re-enables interrupt processing and rearms
+	  the timer interrupt before calling 'hooked' functions.  As a
+	  result, hooked functions are now more 'friendly' and forgiving
+	  on communications - for example the diags module should work
+	  better in all cases and interfere less (if at all) with comms,
+
+	o Added view of the FIFO register to the diagnostics panel: this reads
+	  according to the current FIFO trigger value:
+		C1	16550AN or better installed
+		81	16550 (old series) installed
+		01	FIFO disabled or 16550 not installed
+
+	o BNU now aborts if no hardware COM ports are located
+
+	o Forced port 'autosense' routine to use resident driver's version
+	  of port setup table (since it installs ok),
+
+	o Status call now includes some code to check the state of the
+	  'transmitter' to ensure that transmission is not temporarily
+	  blocked for some reason hopefully increasing TX turnaround.
+
+  * NOTE: BNUPORT from earlier versions is incompatible with releases
+	  after 1.73à due to changes in EOI handling!  Upgrade to BNUPORT
+	  version 1.80 (distributed via usual channels).
+
+
+--- v1.72á 10 Nov 1989
+
+	o Minor changes to port detection routine to 'fix' BIOS data
+	  area correctly for invalid/unknown port addresses
+
+	o Additions to status display: number of physical ports detected
+	  during diagnostics and default FIFO trigger level
+
+	o Arrgh!  Found some 'unfixed' code for the now variable 16550
+	  FIFO sizes, RX/TX buffer purge was resetting the RX buffer to
+	  the old 'hard coded' 8 byte level
+
+	o Fixed bug in error message display on the /Q option when FOSSIL
+	  vector required recapture.
+
+
+--- v1.71á 04 Nov 1989
+
+	o Fixed 'tabs' problem with 'fast' ANSI option
+
+	o Forced a single EOI on each call (experimental);
+	  Note: this is a temporary 'kludge' for experimental
+	  purposes, and means that IRQ's on the FIRST 8259A
+	  (that is IRQ 0-7) are currently supported
+
+	o Forced additional loopback in ISR after servicing
+	  stray THRE's (TX holding register empty) caused during
+	  servicing of MSI's (modem status change) or received
+	  characters.  This should ensure absolutely that no
+	  stray interrupts get lost while in the ISR.
+
+
+
+			 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+

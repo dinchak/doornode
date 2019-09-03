@@ -1,0 +1,14 @@
+{
+  "name": "nbbs",
+  "version": "1.0.0",
+  "description": "node.js bbs system",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ansi-escape-sequences": "^2.0.0"
+  }
+}

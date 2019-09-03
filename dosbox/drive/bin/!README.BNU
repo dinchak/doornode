@@ -1,0 +1,146 @@
+----------------------
+BNU BETA Release 1.89h
+----------------------
+
+NOTE: Change of archiver from LZH to NoGate's PAK.
+
+Please note the change in manner of distribution.  File naming conventions
+have been changed in this and future versions to:
+	
+	BETA<vers>.PAK
+
+This beta version is supplied on the following terms and conditions:
+
+a.	You may not rename or repackage this archive or add anything
+	to it under any condition, or tamper with it's contents
+	before redistribution to anyone else.
+
+b.	It must NOT be made available for file request under any
+	condition, passworded or not; only beta distribution sites 
+	may do so, since they have agreed to make it available in
+	the same manner that I do.  To become beta distribution point,
+	you MUST contact me first about it - do NOT assume that you
+	will be approved before I say so.
+
+	If you aren't a distribution site, you are ALLOWED to pass
+	on the beta version to others, if you think that the person
+	in question is _genuinely_ interested in beta testing.  They
+	must be supplied with the COMPLETE package, as distributed.
+
+c.	It may not be made available for download at all.
+
+d.	It may not be passed on to any automatic distribution system
+	not specifically set up and administered by me (ie. the BNU 
+	TICK distribution).
+
+e.	If you use it, you are obliged to TEST it.  That means not 
+	simply using it as you would a release version; please note
+	any problems and report them by netmail, Internet mail or
+	in the BNU echomail conference.
+
+	====================== IMPORTANT ==========================
+f.	Please do not discuss new features or problems of beta
+	versions of BNU outside the BNU conference; some features
+	may be experimental and may not necessarily be in the 
+	released version. Problems experienced with beta versions
+	are of little to no interest to non-beta testers!
+	===========================================================
+
+The reason for these restrictions is to prevent public circulation of
+beta test software, and distribution to those people who are seriously
+interested in contributing to the beta test effort without unnecessarily
+restricting it's circulation to a closed group or causing me and
+administrative headache which I don't have time for.
+
+You are allowed to pass the archive to anyone who is interested in
+beta testing.  Remember, the beta testing is not closed, and I leave
+it up to your discretion as to whether someone is interested in beta
+testing or not.  The BNU conference is not restricted to just beta 
+testers.  I'm interested in bug reports from the release versions as
+well, and I have no specific need to keep information about new 
+releases "secret" (I just don't need it broadcast in other conferences).
+
+If you do not agree with any of the above, please delete the archive
+and any of it's uncompressed contents now.
+
+As a beta tester, you assume all risks.  This driver and accompanying
+utilities are officially unsupported.  All problem reports are, however,
+appreciated.
+
+Sorry, no complete documentation for beta versions is available.  Use
+the documentation in the last release package, and notice any changes
+in the BNU.REV file supplied.  All significant changes are logged and
+emphasis is added where there is some incompatibility with a previous
+release version or beta.
+
+
+------------------
+DISTRIBUTION SITES
+------------------
+
+The following are approved beta version distribution points.  These
+systems receive beta drivers automatically via TICK, and will therefore
+always have the most current version available:
+
+--- Australia
+
+  3:632/348@fidonet     PEP            Central Source ICBS, Melbourne, Aust	
+        aka 28:4100/1@signet, 90:833/387@imex
+  3:632/308@fidnet      HST,V32        FrontDoor HeadQuarters, Melbourne, Aust
+        aka 28:28/1@signet
+  3:632/313@fidonet     V32            Workware Australia, Melbourne, Aust
+  3:640/820@fidonet     PEP,V32        Marwicks Madhouse, Brisbane, Aust
+  3:633/320@fidonet     PEP            Southern Mail, Melbourne, Aust
+        aka 28:4100/2@signet
+  3:712/515@fidonet     PEP            Assorted C BBS, Sydney, Aust
+  3:635/503@fidonet     V32            Andy's BBS
+        aka 28:4100/18@signet
+
+--- North America
+
+  1:260/340@fidonet     HST             Rivendell, NY, USA
+        aka 26:1315/1@signet
+  1:163/115@fidonet     HST             LightSpeed, Nepean, Canada
+        aka 34:34/1@signet
+  1:134/301@fidonet     HST,V32,V42b    Nuclear SuperSystems, Sth Alberta
+        aka 25:2403/401@signet 89:689/401@imex
+
+--- Europe
+
+  2:281/603@fidonet     2400MNP         The Triplets, Zoetermeer, Holland
+  2:201/310@fidonet     HST,V32,V42b    Ctrl-Alt-Del, Kungsholmen, Sweden
+        aka 27:1346/100@signet
+  2:310/11@fidonet      HST,V32         Deep Node, Vienna, Austria
+        aka 27:27/1@signet
+
+New BNU beta versions are available after a new version announcement
+in the BNU conference, generally by passworded file requesting BNU_BETA, 
+BETA<version>.PAK (it may take a few of days for distribution sites
+to alter the alias name, so try the second one first) with the password
+PLUGH.
+
+
+---------------
+PROBLEM REPORTS
+---------------
+
+Problem reports should be as detailed as possible, without being too
+ridiculous. :-)  The following (as Peter Janssens will tell you) are
+almost essential:
+
+    Contents of     CONFIG.SYS
+                    AUTOEXEC.BAT
+
+	List of TSRs (MAPMEM listings are good)
+	Description of the problem and >> how to repeat it <<
+	Description of your modem & general setup
+	Description of your machine & operating environment
+	Anything else that may be relevant
+
+Thanks for helping to test BNU.
+
+david nugent
+3:632/348@fidonet, 28:4100/1@signet, 90:833/387@imex
+Internet: david@csource.oz.au
+    Uucp: ..!uunet!munnari!csource.oz.au!david
+
